@@ -8,8 +8,7 @@ public class Biller {
     }
 
 
-    private String billerCode;
-    private String billerName;
-
-    private String endpointUrl;
+    private final String billerCode;
+    private final String billerName;
+    private final String endpointUrl;
 }
