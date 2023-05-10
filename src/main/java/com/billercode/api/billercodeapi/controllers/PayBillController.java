@@ -4,7 +4,7 @@ import com.billercode.api.billercodeapi.services.BillerService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,7 +47,7 @@ public class PayBillController {
             }
 
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-            URL endpointUrl = new URL(uri.toString() + billers.get(billerCode));
+            URL endpointUrl = new URL(uri + billers.get(billerCode));
 
             requestMap.remove("billerCode");
             String jsonPayload = gson.toJson(requestMap);

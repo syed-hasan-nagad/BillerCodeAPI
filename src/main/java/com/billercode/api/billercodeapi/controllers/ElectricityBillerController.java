@@ -32,7 +32,7 @@ public class ElectricityBillerController {
 
         return response;
 
-    };
+    }
 
 
 }
