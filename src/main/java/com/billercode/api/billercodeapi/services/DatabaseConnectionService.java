@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 public class DatabaseConnectionService {
 
-    private static final String dbURL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
+    private static final String dbURL =     "jdbc:oracle:thin:@localhost:1521/XEPDB1";
     private static final String username = "sanzid";
     private static final String password = "QWERTYuiop1";
 
