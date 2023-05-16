@@ -47,13 +47,14 @@ public class BillerService {
             String endpointUrl = resultSet.getString("endpoint_url");
                    billerCode = resultSet.getString("biller_code");
             String billerName = resultSet.getString("biller_name");
+            String requestMethod = resultSet.getString("request_method");
             String parameterMappingString = resultSet.getString("parameter_mapping");
 
             Map<String,String> parameterMappingMap;
             Type parameterMappingType = new TypeToken<Map<String, String>>() {}.getType();
             parameterMappingMap = gson.fromJson(parameterMappingString, parameterMappingType);
 
-            biller = new Biller(billerCode,billerName,endpointUrl,parameterMappingMap);
+            biller = new Biller(billerCode,billerName,endpointUrl,requestMethod,parameterMappingMap);
 
         }
         return biller;

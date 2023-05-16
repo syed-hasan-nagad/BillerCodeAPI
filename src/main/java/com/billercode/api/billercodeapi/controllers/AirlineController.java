@@ -1,16 +1,19 @@
 package com.billercode.api.billercodeapi.controllers;
 
+import com.billercode.api.billercodeapi.models.Biller;
 import com.billercode.api.billercodeapi.models.RequestJson;
+import com.billercode.api.billercodeapi.services.BillerService;
 import com.billercode.api.billercodeapi.utils.SendHTTPRequest;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +25,9 @@ public class AirlineController {
     @Autowired
     private Gson gson;
 
-    HashMap<String, String> apiList = new HashMap<>();
+    private BillerService billerService = new BillerService();
+
+
     Map<String, String> headers = new HashMap<>();
     URL endpointUrl;
 
@@ -36,81 +41,27 @@ public class AirlineController {
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> routeRequest(@RequestBody RequestJson request) {
-        try {
+    public ResponseEntity<String> routeRequest(@RequestBody RequestJson request) throws SQLException, IOException {
 
-            ResponseEntity<String> response;
+        Biller biller =  billerService.getBillerByBillerCodefromDB(request.getBillerCode());
 
-            Map<String, Object> requestPayload = new HashMap<>();
-            apiList.put("1101", "https://api.instantwebtools.net/v1/airlines");
-            apiList.put("1102", "https://api.instantwebtools.net/v1/passenger");
-            apiList.put("1103", "https://api.instantwebtools.net/v1/airlines");
+        URL url = new URL(biller.getEndpointUrl());
+        headers.put("Content-Type", "application/json");
+        Map <String, String> parameterMapping =  biller.getParameterMapping();
+        String userRequestString = gson.toJson(request);
+        Map<String, String> userRequestMap = gson.fromJson(userRequestString,new TypeToken<Map<String, String>>() {}.getType());
 
+        Map <String,Object> requestBody = new HashMap<>();
 
-            String billerCode = request.getBillerCode();
-            if (billerCode == null) {
-                return ResponseEntity.badRequest().body("Biller code cannot be null");
+        parameterMapping.forEach((key,value)->{
+            if(!value.isEmpty()){
+                requestBody.put(value,userRequestMap.get(key));
             }
+        });
 
-            String responseBody;
+       String response = SendHTTPRequest.sendHttpRequest(biller.getRequestMethod(),10000,10000,requestBody,url,headers);
 
-            switch (billerCode) {
-                case "1101" -> { // add airlines
-                    endpointUrl = new URL(apiList.get(billerCode));
-
-                    // setting the headers to use for the request
-                    headers.put("Content-Type", "application/json");
-                    requestPayload.put("name", request.getParam1());
-                    requestPayload.put("country", request.getParam2());
-                    requestPayload.put("logo", request.getParam3());
-                    requestPayload.put("slogan", request.getParam4());
-                    requestPayload.put("head_quarters", request.getParam5());
-                    requestPayload.put("website", request.getParam6());
-                    requestPayload.put("established", request.getParam7());
-
-                    //Using HttpUrlConnection
-                    try {
-                        // sending the request
-                        responseBody = SendHTTPRequest.sendHttpRequest("POST",10000,10000, requestPayload, endpointUrl, headers);
-
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    response = ResponseEntity.ok().body(responseBody);
-                }
-                case "1102" -> { // add passenger
-                    endpointUrl = new URL(apiList.get(billerCode));
-                    requestPayload.put("name", request.getParam1());
-                    requestPayload.put("trips", request.getParam2());
-                    requestPayload.put("airline", request.getParam3());
-                    try {
-                        responseBody = SendHTTPRequest.sendHttpRequest("POST",10000, 10000, requestPayload, endpointUrl, headers);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    response = ResponseEntity.ok().body(responseBody);
-                }
-                case "1103" -> { // Get All Airlines
-                    endpointUrl = new URL(apiList.get(billerCode));
-                    try {
-                        responseBody = SendHTTPRequest.sendHttpRequest("GET",10000, 10000, requestPayload, endpointUrl, headers);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    response = ResponseEntity.ok().body(responseBody);
-                }
-                //response = ResponseEntity.ok().body(restTemplate.postForObject(endpointUrl.toURI(), requestPayload, String.class));
-                default -> { // incase code not in use here
-                    requestPayload.put("Message", "The code sent is not valid for any vendors");
-                    response = ResponseEntity.badRequest().body(gson.toJson(requestPayload));
-                }
-            }
-
-            return response;
-
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+        return ResponseEntity.ok().body(response);
     }
 
 }
