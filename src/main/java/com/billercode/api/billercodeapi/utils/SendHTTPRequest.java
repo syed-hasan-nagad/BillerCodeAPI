@@ -14,8 +14,6 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class SendHTTPRequest {
-
-
     static Gson gson = new Gson();
     public static String sendHttpRequest(String requestMethod, int connectionTimeout,int readTimeout, Map<String, Object> requestPayload, URL endpointUrl, Map<String,String> headers) throws IOException {
         BufferedReader streamReader;

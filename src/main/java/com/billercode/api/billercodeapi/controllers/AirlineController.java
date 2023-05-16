@@ -39,7 +39,6 @@ public class AirlineController {
     public ResponseEntity<String> routeRequest(@RequestBody RequestJson request) {
         try {
 
-
             ResponseEntity<String> response;
 
             Map<String, Object> requestPayload = new HashMap<>();
