@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,23 +33,14 @@ public class AirlineController {
     Map<String, String> headers = new HashMap<>();
     URL endpointUrl;
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> getAllAirlines() throws IOException {
-        headers.put("Content-Type", "application/json");
-        endpointUrl = new URL("https://api.instantwebtools.net/v1/airlines");
-        String res =  SendHTTPRequest.sendHttpRequest("GET",10000,10000,null,endpointUrl,headers);
-
-        return ResponseEntity.ok().body(res);
-    }
-
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> routeRequest(@RequestBody RequestJson request) throws SQLException, IOException {
+    public ResponseEntity<String> routeRequest(@RequestBody RequestJson request) throws SQLException, IOException, NoSuchAlgorithmException, KeyManagementException {
 
         Biller biller =  billerService.getBillerByBillerCodefromDB(request.getBillerCode());
 
         URL url = new URL(biller.getEndpointUrl());
-        headers.put("Content-Type", "application/json");
         Map <String, String> parameterMapping =  biller.getParameterMapping();
+        Map <String, String> connectionSettings =  biller.getConnectionSettings();
         String userRequestString = gson.toJson(request);
         Map<String, String> userRequestMap = gson.fromJson(userRequestString,new TypeToken<Map<String, String>>() {}.getType());
 
@@ -59,7 +52,7 @@ public class AirlineController {
             }
         });
 
-       String response = SendHTTPRequest.sendHttpRequest(biller.getRequestMethod(),10000,10000,requestBody,url,headers);
+       String response = SendHTTPRequest.sendHttpRequest(biller.getRequestMethod(),requestBody,url,connectionSettings);
 
         return ResponseEntity.ok().body(response);
     }

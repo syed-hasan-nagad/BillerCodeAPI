@@ -49,12 +49,14 @@ public class BillerService {
             String billerName = resultSet.getString("biller_name");
             String requestMethod = resultSet.getString("request_method");
             String parameterMappingString = resultSet.getString("parameter_mapping");
+            String connectionSettingsString = resultSet.getString("connection_settings");
 
-            Map<String,String> parameterMappingMap;
+            Map<String,String> parameterMappingMap,connectionSettingsMap;
             Type parameterMappingType = new TypeToken<Map<String, String>>() {}.getType();
             parameterMappingMap = gson.fromJson(parameterMappingString, parameterMappingType);
+            connectionSettingsMap = gson.fromJson(connectionSettingsString, parameterMappingType);
 
-            biller = new Biller(billerCode,billerName,endpointUrl,requestMethod,parameterMappingMap);
+            biller = new Biller(billerCode,billerName,endpointUrl,requestMethod,parameterMappingMap,connectionSettingsMap);
 
         }
         return biller;

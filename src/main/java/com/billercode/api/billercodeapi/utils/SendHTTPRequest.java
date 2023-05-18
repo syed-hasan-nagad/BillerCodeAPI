@@ -2,37 +2,44 @@ package com.billercode.api.billercodeapi.utils;
 
 import com.google.gson.Gson;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 
 public class SendHTTPRequest {
     static Gson gson = new Gson();
-    public static String sendHttpRequest(String requestMethod, int connectionTimeout,int readTimeout, Map<String, Object> requestPayload, URL endpointUrl, Map<String,String> headers) throws IOException {
+    public static String sendHttpRequest(String requestMethod, Map<String, Object> requestPayload, URL endpointUrl, Map<String,String> connectionSettings) throws IOException, NoSuchAlgorithmException, KeyManagementException {
         BufferedReader streamReader;
         StringBuilder fullResponseBuilder =  new StringBuilder();
 
         HashSet<String> requestMethods = new HashSet<>(Arrays.asList( "GET", "POST", "PUT", "DELETE"));
 
-        HttpURLConnection connection =  (HttpURLConnection) endpointUrl.openConnection();
+        HttpsURLConnection connection = (HttpsURLConnection) endpointUrl.openConnection();
+        boolean enableSSL = Boolean.parseBoolean(connectionSettings.get("enableSSL"));
+
+
 
         if (requestMethods.contains(requestMethod) ) {
             connection.setRequestMethod(requestMethod.toUpperCase());
-            if (!headers.isEmpty()) {
-                for (Map.Entry<String, String> entry : headers.entrySet()) {
-                    connection.setRequestProperty(entry.getKey(), entry.getValue());
-                }
-        }
-            //connection.setRequestProperty("Accept","application/json"); Not required most of the time
-            connection.setConnectTimeout(connectionTimeout);
-            connection.setReadTimeout(readTimeout);
+            if(enableSSL){
+                SSLContext sslContext = SSLContext.getInstance(connectionSettings.get("tlsVersion"));
+                sslContext.init(null, null, new SecureRandom());
+                connection.setSSLSocketFactory(sslContext.getSocketFactory());
+            }
+            connection.setRequestProperty("Content-Type", connectionSettings.get("contentType"));
+            connection.setConnectTimeout(Integer.parseInt(connectionSettings.get("connectionTimeout")));
+            connection.setReadTimeout(Integer.parseInt(connectionSettings.get("readTimeout")));
 
             if (!requestMethod.equalsIgnoreCase("GET")){
                 connection.setDoOutput(true);
