@@ -40,7 +40,6 @@ public class AirlineController {
 
         URL url = new URL(biller.getEndpointUrl());
         Map <String, String> parameterMapping =  biller.getParameterMapping();
-        Map <String, String> connectionSettings =  biller.getConnectionSettings();
         String userRequestString = gson.toJson(request);
         Map<String, String> userRequestMap = gson.fromJson(userRequestString,new TypeToken<Map<String, String>>() {}.getType());
 
@@ -52,7 +51,16 @@ public class AirlineController {
             }
         });
 
-       String response = SendHTTPRequest.sendHttpRequest(biller.getRequestMethod(),requestBody,url,connectionSettings);
+       String response = SendHTTPRequest.sendHttpRequest(
+               biller.getRequestMethod(),
+               requestBody,
+               url,
+               biller.getConnectionTimeout(),
+               biller.getReadTimeout(),
+               biller.getContentType(),
+               biller.isEnableSSL(),
+               biller.getTlsVersion()
+       );
 
         return ResponseEntity.ok().body(response);
     }

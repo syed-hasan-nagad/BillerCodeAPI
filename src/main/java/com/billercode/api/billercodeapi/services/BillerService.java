@@ -35,7 +35,7 @@ public class BillerService {
     public Biller getBillerByBillerCodefromDB(String billerCode) throws SQLException {
         Connection connection =  DatabaseConnectionService.getDBConnection();
         Biller biller = null;
-
+        boolean enableSslFlag = false;
         String sql = "SELECT * FROM SANZID.BILLERS WHERE biller_code = ?";
 
 
@@ -49,14 +49,24 @@ public class BillerService {
             String billerName = resultSet.getString("biller_name");
             String requestMethod = resultSet.getString("request_method");
             String parameterMappingString = resultSet.getString("parameter_mapping");
-            String connectionSettingsString = resultSet.getString("connection_settings");
+            int connectionTimeout = resultSet.getInt("connectionTimeout");
+            int readTimeout = resultSet.getInt("readTimeout");
+            String contentType = resultSet.getString("content_type");
+            String tlsVersion = resultSet.getString("tlsVersion");
+            String enableSSL = resultSet.getString("enableSsl");
 
-            Map<String,String> parameterMappingMap,connectionSettingsMap;
+            if(enableSSL.equals("Y")){
+                enableSslFlag = true;
+            } else if (enableSSL.equals("N")) {
+                enableSslFlag = false;
+            }
+
+
+            Map<String,String> parameterMappingMap;
             Type parameterMappingType = new TypeToken<Map<String, String>>() {}.getType();
             parameterMappingMap = gson.fromJson(parameterMappingString, parameterMappingType);
-            connectionSettingsMap = gson.fromJson(connectionSettingsString, parameterMappingType);
 
-            biller = new Biller(billerCode,billerName,endpointUrl,requestMethod,parameterMappingMap,connectionSettingsMap);
+            biller = new Biller(billerCode,billerName,endpointUrl,requestMethod,parameterMappingMap,connectionTimeout,readTimeout,contentType,tlsVersion,enableSslFlag);
 
         }
         return biller;

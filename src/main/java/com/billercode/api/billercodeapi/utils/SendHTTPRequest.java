@@ -19,27 +19,34 @@ import java.util.Map;
 
 public class SendHTTPRequest {
     static Gson gson = new Gson();
-    public static String sendHttpRequest(String requestMethod, Map<String, Object> requestPayload, URL endpointUrl, Map<String,String> connectionSettings) throws IOException, NoSuchAlgorithmException, KeyManagementException {
+    public static String sendHttpRequest(String requestMethod,
+                                         Map<String, Object> requestPayload,
+                                         URL endpointUrl,
+                                         int connectionTimeout,
+                                         int readTimeout,
+                                         String contentType,
+                                         boolean enableSSL,
+                                         String tlsVersion) throws IOException, NoSuchAlgorithmException, KeyManagementException {
         BufferedReader streamReader;
         StringBuilder fullResponseBuilder =  new StringBuilder();
 
         HashSet<String> requestMethods = new HashSet<>(Arrays.asList( "GET", "POST", "PUT", "DELETE"));
 
         HttpsURLConnection connection = (HttpsURLConnection) endpointUrl.openConnection();
-        boolean enableSSL = Boolean.parseBoolean(connectionSettings.get("enableSSL"));
+
 
 
 
         if (requestMethods.contains(requestMethod) ) {
             connection.setRequestMethod(requestMethod.toUpperCase());
             if(enableSSL){
-                SSLContext sslContext = SSLContext.getInstance(connectionSettings.get("tlsVersion"));
+                SSLContext sslContext = SSLContext.getInstance(tlsVersion);
                 sslContext.init(null, null, new SecureRandom());
                 connection.setSSLSocketFactory(sslContext.getSocketFactory());
             }
-            connection.setRequestProperty("Content-Type", connectionSettings.get("contentType"));
-            connection.setConnectTimeout(Integer.parseInt(connectionSettings.get("connectionTimeout")));
-            connection.setReadTimeout(Integer.parseInt(connectionSettings.get("readTimeout")));
+            connection.setRequestProperty("Content-Type", contentType);
+            connection.setConnectTimeout(connectionTimeout);
+            connection.setReadTimeout(readTimeout);
 
             if (!requestMethod.equalsIgnoreCase("GET")){
                 connection.setDoOutput(true);
