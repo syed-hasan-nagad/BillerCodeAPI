@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
@@ -32,7 +33,13 @@ public class SendHTTPRequest {
 
         HashSet<String> requestMethods = new HashSet<>(Arrays.asList( "GET", "POST", "PUT", "DELETE"));
 
-        HttpsURLConnection connection = (HttpsURLConnection) endpointUrl.openConnection();
+        HttpURLConnection connection ;
+
+        if (enableSSL){
+            connection = (HttpsURLConnection) endpointUrl.openConnection();
+        }else{
+            connection = (HttpURLConnection) endpointUrl.openConnection();
+        }
 
 
 
@@ -42,7 +49,7 @@ public class SendHTTPRequest {
             if(enableSSL){
                 SSLContext sslContext = SSLContext.getInstance(tlsVersion);
                 sslContext.init(null, null, new SecureRandom());
-                connection.setSSLSocketFactory(sslContext.getSocketFactory());
+                ((HttpsURLConnection) connection).setSSLSocketFactory(sslContext.getSocketFactory());
             }
             connection.setRequestProperty("Content-Type", contentType);
             connection.setConnectTimeout(connectionTimeout);
