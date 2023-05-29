@@ -14,20 +14,21 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 
 public class SendHTTPRequest {
     static Gson gson = new Gson();
-    public static String sendHttpRequest(String requestMethod,
-                                         Map<String, Object> requestPayload,
-                                         URL endpointUrl,
-                                         int connectionTimeout,
-                                         int readTimeout,
-                                         String contentType,
-                                         boolean enableSSL,
-                                         String tlsVersion) throws IOException, NoSuchAlgorithmException, KeyManagementException {
+    public static ArrayList<String> sendHttpRequest(String requestMethod,
+                                            Map<String, Object> requestPayload,
+                                            URL endpointUrl,
+                                            int connectionTimeout,
+                                            int readTimeout,
+                                            String contentType,
+                                            boolean enableSSL,
+                                            String tlsVersion) throws IOException, NoSuchAlgorithmException, KeyManagementException {
         BufferedReader streamReader;
         StringBuilder fullResponseBuilder =  new StringBuilder();
 
@@ -40,8 +41,6 @@ public class SendHTTPRequest {
         }else{
             connection = (HttpURLConnection) endpointUrl.openConnection();
         }
-
-
 
 
         if (requestMethods.contains(requestMethod) ) {
@@ -73,7 +72,12 @@ public class SendHTTPRequest {
             } else {
                 streamReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             }
-            return fullResponseBuilder.append(streamReader.readLine()).toString();
+
+            ArrayList<String> response =new ArrayList<String>();
+            response.add(0,fullResponseBuilder.append(streamReader.readLine()).toString());
+            response.add(1, String.valueOf(status));
+
+            return response ;
         }
         else{
             throw new RuntimeException("Error! Request method is incorrect");

@@ -54,6 +54,7 @@ public class BillerService {
             String contentType = resultSet.getString("content_type");
             String tlsVersion = resultSet.getString("tlsVersion");
             String enableSSL = resultSet.getString("enableSsl");
+            String validationUrl = resultSet.getString("validation_url");
 
             if(enableSSL.equals("Y")){
                 enableSslFlag = true;
@@ -66,7 +67,9 @@ public class BillerService {
             Type parameterMappingType = new TypeToken<Map<String, String>>() {}.getType();
             parameterMappingMap = gson.fromJson(parameterMappingString, parameterMappingType);
 
-            biller = new Biller(billerCode,billerName,endpointUrl,requestMethod,parameterMappingMap,connectionTimeout,readTimeout,contentType,tlsVersion,enableSslFlag);
+            biller = new Biller(billerCode,billerName,endpointUrl,
+                    requestMethod,parameterMappingMap,connectionTimeout,
+                    readTimeout,contentType,tlsVersion,enableSslFlag, validationUrl);
 
         }
         return biller;

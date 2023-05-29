@@ -1,7 +1,6 @@
 package com.billercode.api.billercodeapi.models;
 
-public class RequestJson {
-
+public class ValidationJson {
     public String billerCode;
     public String param1;
     public String param2;

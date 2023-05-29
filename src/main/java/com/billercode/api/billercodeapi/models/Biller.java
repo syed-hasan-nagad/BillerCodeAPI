@@ -13,8 +13,9 @@ public class Biller {
     private String contentType;
     private String tlsVersion;
     private boolean enableSSL;
+    private String validationUrl;
 
-    public Biller(String billerCode, String billerName, String endpointUrl, String requestMethod, Map<String, String> parameterMapping, int connectionTimeout, int readTimeout, String contentType, String tlsVersion, boolean enableSSL) {
+    public Biller(String billerCode, String billerName, String endpointUrl, String requestMethod, Map<String, String> parameterMapping, int connectionTimeout, int readTimeout, String contentType, String tlsVersion, boolean enableSSL, String validationUrl) {
         this.billerCode = billerCode;
         this.billerName = billerName;
         this.endpointUrl = endpointUrl;
@@ -25,18 +26,9 @@ public class Biller {
         this.contentType = contentType;
         this.tlsVersion = tlsVersion;
         this.enableSSL = enableSSL;
+        this.validationUrl = validationUrl;
     }
 
-
-
-
-    public Biller(String billerCode, String billerName, String endpointUrl, String requestMethod, Map<String, String> parameterMapping) {
-        this.billerCode = billerCode;
-        this.billerName = billerName;
-        this.endpointUrl = endpointUrl;
-        this.requestMethod = requestMethod;
-        this.parameterMapping = parameterMapping;
-    }
 
 
     public String getBillerCode() {
@@ -58,10 +50,10 @@ public class Biller {
     public Map<String, String> getParameterMapping() {
         return parameterMapping;
     }
+
     public int getConnectionTimeout() {
         return connectionTimeout;
     }
-
     public int getReadTimeout() {
         return readTimeout;
     }
@@ -76,6 +68,10 @@ public class Biller {
 
     public boolean isEnableSSL() {
         return enableSSL;
+    }
+
+    public String getValidationUrl() {
+        return validationUrl;
     }
 
 }
