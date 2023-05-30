@@ -1,8 +1,19 @@
 package com.billercode.api.billercodeapi.models;
 
-public class confirmationJson {
+public class ConfirmationJson {
 
     public String billerCode;
+
+    public String ValidationId;
+
+    public String getValidationId() {
+        return ValidationId;
+    }
+
+    public void setValidationId(String validationId) {
+        ValidationId = validationId;
+    }
+
     public String param1;
     public String param2;
     public String param3;

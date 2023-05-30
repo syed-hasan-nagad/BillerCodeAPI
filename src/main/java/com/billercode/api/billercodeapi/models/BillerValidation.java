@@ -1,15 +1,21 @@
 package com.billercode.api.billercodeapi.models;
 
 public class BillerValidation {
-    private String billerCode;
-    private String sessionId;
+    private final String billerCode;
+    private final String sessionId;
 
-    private String status;
+    private final String status;
+    private final String hash;
 
-    public BillerValidation(String billerCode, String sessionId, String status) {
+    public BillerValidation(String billerCode, String sessionId, String status, String hash) {
         this.billerCode = billerCode;
         this.sessionId = sessionId;
         this.status = status;
+        this.hash = hash;
+    }
+
+    public String getHash() {
+        return hash;
     }
 
     public String getBillerCode() {

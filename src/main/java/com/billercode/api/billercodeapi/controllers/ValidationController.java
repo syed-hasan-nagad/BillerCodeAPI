@@ -6,6 +6,7 @@ import com.billercode.api.billercodeapi.models.ValidationJson;
 import com.billercode.api.billercodeapi.services.BillerService;
 import com.billercode.api.billercodeapi.services.BillerValidationStorageService;
 import com.billercode.api.billercodeapi.services.sessionIdGenerator;
+import com.billercode.api.billercodeapi.utils.HashCreator;
 import com.billercode.api.billercodeapi.utils.SendHTTPRequest;
 import com.google.gson.Gson;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,7 @@ public record ValidationController(Gson gson) {
 
     static BillerService billerService = new BillerService();
     static BillerValidationStorageService billerValidationStorageService =  new BillerValidationStorageService();
+    static HashCreator hashCreator = new HashCreator();
 
     @PostMapping
     public ResponseEntity<BillerValidation> BillValidation(@RequestBody ValidationJson request) throws SQLException, IOException, NoSuchAlgorithmException, KeyManagementException {
@@ -50,14 +52,18 @@ public record ValidationController(Gson gson) {
         );
 
 
+
+
         BillerValidation billerValidation;
+        int status = Integer.parseInt(response.get(1));
+        String hash = hashCreator.createSHAHash(sessionID+request.getParam1());
 
-        if(response.get(1).equals("200")){
+        if((status>=200)&&(status<400) ){
 
-            billerValidation = new BillerValidation(billerCode, sessionID, "success");
+            billerValidation = new BillerValidation(billerCode, sessionID, "success", hash);
         }
         else{
-            billerValidation = new BillerValidation(billerCode, sessionID, "fail");
+            billerValidation = new BillerValidation(billerCode, sessionID, "fail", hash);
         }
         billerValidationStorageService.saveBillerValidation(billerValidation);
         return ResponseEntity.ok().body(billerValidation);

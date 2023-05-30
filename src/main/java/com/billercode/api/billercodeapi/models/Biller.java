@@ -8,12 +8,12 @@ public class Biller {
     private final String endpointUrl;
     private final String requestMethod;
     private final Map<String,String> parameterMapping;
-    private int connectionTimeout;
-    private int readTimeout;
-    private String contentType;
-    private String tlsVersion;
-    private boolean enableSSL;
-    private String validationUrl;
+    private final int connectionTimeout;
+    private final int readTimeout;
+    private final String contentType;
+    private final String tlsVersion;
+    private final boolean enableSSL;
+    private final String validationUrl;
 
     public Biller(String billerCode, String billerName, String endpointUrl, String requestMethod, Map<String, String> parameterMapping, int connectionTimeout, int readTimeout, String contentType, String tlsVersion, boolean enableSSL, String validationUrl) {
         this.billerCode = billerCode;
