@@ -25,12 +25,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping(path = "airlines/validation")
+@RequestMapping(path = "validation")
 public record ValidationController(Gson gson) {
 
-    static BillerService billerService = new BillerService();
-    static BillerValidationStorageService billerValidationStorageService =  new BillerValidationStorageService();
-    static HashCreator hashCreator = new HashCreator();
+    static final BillerService billerService = new BillerService();
+    static final BillerValidationStorageService billerValidationStorageService =  new BillerValidationStorageService();
+    static final HashCreator hashCreator = new HashCreator();
 
     @PostMapping
     public ResponseEntity<BillerValidation> BillValidation(@RequestBody ValidationJson request) throws SQLException, IOException, NoSuchAlgorithmException, KeyManagementException {
@@ -38,17 +38,17 @@ public record ValidationController(Gson gson) {
         Biller biller = billerService.getBillerByBillerCodefromDB(billerCode);
         String sessionID = sessionIdGenerator.getNewSessionId();
 
-        URL url = new URL(biller.getValidationUrl());
+        URL url = new URL(biller.validationUrl());
         Map <String,Object> requestBody = new HashMap<>();
         ArrayList<String> response = SendHTTPRequest.sendHttpRequest(
-                biller.getRequestMethod(),
+                biller.requestMethod(),
                 requestBody,
                 url,
-                biller.getConnectionTimeout(),
-                biller.getReadTimeout(),
-                biller.getContentType(),
-                biller.isEnableSSL(),
-                biller.getTlsVersion()
+                biller.connectionTimeout(),
+                biller.readTimeout(),
+                biller.contentType(),
+                biller.enableSSL(),
+                biller.tlsVersion()
         );
 
 
@@ -60,10 +60,10 @@ public record ValidationController(Gson gson) {
 
         if((status>=200)&&(status<400) ){
 
-            billerValidation = new BillerValidation(billerCode, sessionID, "success", hash);
+            billerValidation = new BillerValidation(billerCode, sessionID, "success", "pending", hash);
         }
         else{
-            billerValidation = new BillerValidation(billerCode, sessionID, "fail", hash);
+            billerValidation = new BillerValidation(billerCode, sessionID, "fail", null, hash);
         }
         billerValidationStorageService.saveBillerValidation(billerValidation);
         return ResponseEntity.ok().body(billerValidation);

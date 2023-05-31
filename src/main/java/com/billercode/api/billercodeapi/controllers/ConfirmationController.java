@@ -30,7 +30,7 @@ import static com.billercode.api.billercodeapi.controllers.ValidationController.
 
 
 @RestController
-@RequestMapping("/airlines")
+@RequestMapping("/confirmation")
 public class ConfirmationController {
 
     private final BillerService billerService = new BillerService();
@@ -47,18 +47,19 @@ public class ConfirmationController {
         if (validationBiller.isEmpty()) {
             return ResponseEntity.status(400).body("Error: Transaction validation is not found.");
         }
-        if (validationBiller.get().getStatus().equalsIgnoreCase("fail")) {
+        if (validationBiller.get().validationStatus().equalsIgnoreCase("fail")) {
             return ResponseEntity.status(400).body("Error: Transaction failed Validation.");
         }
-        if (validationBiller.get().getStatus().equalsIgnoreCase("completed")) {
-            return ResponseEntity.status(400).body("Error: Transaction already Completed.");
+        if (validationBiller.get().confirmationStatus().equalsIgnoreCase("completed")) {
+            return ResponseEntity.status(400).body("Error: Transaction is already completed.");
         }
-        if ((validationBiller.get().getStatus().equalsIgnoreCase("success"))
-                && (validationBiller.get().getHash().equalsIgnoreCase(hash))) {
+        if (       (validationBiller.get().validationStatus().equalsIgnoreCase("success"))
+                && (validationBiller.get().hash().equalsIgnoreCase(hash))
+                && (validationBiller.get().confirmationStatus().equalsIgnoreCase("pending"))) {
 
             Biller biller = billerService.getBillerByBillerCodefromDB(request.getBillerCode());
-            URL url = new URL(biller.getEndpointUrl());
-            Map<String, String> parameterMapping = biller.getParameterMapping();
+            URL url = new URL(biller.endpointUrl());
+            Map<String, String> parameterMapping = biller.parameterMapping();
             String userRequestString = gson.toJson(request);
             Map<String, String> userRequestMap = gson.fromJson(userRequestString, new TypeToken<Map<String, String>>() {
             }.getType());
@@ -72,17 +73,17 @@ public class ConfirmationController {
             });
 
             ArrayList<String> response = SendHTTPRequest.sendHttpRequest(
-                    biller.getRequestMethod(),
+                    biller.requestMethod(),
                     requestBody,
                     url,
-                    biller.getConnectionTimeout(),
-                    biller.getReadTimeout(),
-                    biller.getContentType(),
-                    biller.isEnableSSL(),
-                    biller.getTlsVersion()
+                    biller.connectionTimeout(),
+                    biller.readTimeout(),
+                    biller.contentType(),
+                    biller.enableSSL(),
+                    biller.tlsVersion()
             );
             if (response.get(1).equals("200")) {
-                billerValidationStorageService.setBillerValidationToComplete(validationBiller.get());
+                billerValidationStorageService.setConfirmationStatusToComplete(validationBiller.get());
             }
             return ResponseEntity.ok().body(response.get(0));
         } else {

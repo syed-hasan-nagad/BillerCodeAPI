@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class SendHTTPRequest {
-    static Gson gson = new Gson();
+    static final Gson gson = new Gson();
     public static ArrayList<String> sendHttpRequest(String requestMethod,
                                             Map<String, Object> requestPayload,
                                             URL endpointUrl,
@@ -73,7 +73,7 @@ public class SendHTTPRequest {
                 streamReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             }
 
-            ArrayList<String> response =new ArrayList<String>();
+            ArrayList<String> response = new ArrayList<>();
             response.add(0,fullResponseBuilder.append(streamReader.readLine()).toString());
             response.add(1, String.valueOf(status));
 

@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class BillerService {
 
-    Gson gson = new Gson();
+    final Gson gson = new Gson();
 
     public HashMap<String, String> getBillersfromDB() throws SQLException {
         Connection connection =  DatabaseConnectionService.getDBConnection();

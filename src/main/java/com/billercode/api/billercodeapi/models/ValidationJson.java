@@ -1,15 +1,15 @@
 package com.billercode.api.billercodeapi.models;
 
 public class ValidationJson {
-    public String billerCode;
-    public String param1;
-    public String param2;
-    public String param3;
-    public String param4;
-    public String param5;
-    public String param6;
-    public String param7;
-    public String param8;
+    private String billerCode;
+    private String param1;
+    private String param2;
+    private String param3;
+    private String param4;
+    private String param5;
+    private String param6;
+    private String param7;
+    private String param8;
 
     public String getBillerCode() {
         return billerCode;
