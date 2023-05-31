@@ -44,6 +44,21 @@ public class BillerValidationStorageService {
 
     }
 
+    public void setConfirmationStatusToFailed(BillerValidation row) throws SQLException {
+
+        Connection connection =  DatabaseConnectionService.getDBConnection();
+        String sql = "UPDATE SANZID.BILLERVALIDATIONS SET confirmationstatus = 'failed' WHERE SESSIONID = ?";
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1,row.sessionId());
+            int i =  statement.executeUpdate(); // returns number of records saved/changed as an integer
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        connection.close();
+
+    }
+
     public Optional<BillerValidation> getBillerValidationBySessionID(String sessionID) throws SQLException {
 
         Connection connection =  DatabaseConnectionService.getDBConnection();
