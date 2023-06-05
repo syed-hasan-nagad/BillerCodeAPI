@@ -1,9 +1,11 @@
 package com.billercode.api.billercodeapi.controllers;
 
+import com.billercode.api.billercodeapi.exceptions.CustomDataNotFoundException;
+import com.billercode.api.billercodeapi.exceptions.CustomTimeoutException;
 import com.billercode.api.billercodeapi.models.Biller;
 import com.billercode.api.billercodeapi.models.BillerValidation;
-import com.billercode.api.billercodeapi.models.Response;
 import com.billercode.api.billercodeapi.models.ValidationJson;
+import com.billercode.api.billercodeapi.models.VerificationResponse;
 import com.billercode.api.billercodeapi.services.BillerService;
 import com.billercode.api.billercodeapi.services.BillerValidationStorageService;
 import com.billercode.api.billercodeapi.services.sessionIdGenerator;
@@ -30,22 +32,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping(path = "validation")
-public record ValidationController(Gson gson) {
+@RequestMapping(path = "verification")
+public record VerificationController(Gson gson) {
 
     static final BillerService billerService = new BillerService();
-    static final BillerValidationStorageService billerValidationStorageService =  new BillerValidationStorageService();
+    static final BillerValidationStorageService billerValidationStorageService = new BillerValidationStorageService();
     static final HashCreator hashCreator = new HashCreator();
 
     @PostMapping
-    public ResponseEntity<Object> BillValidation(@RequestBody ValidationJson request) throws SQLException, IOException, NoSuchAlgorithmException, KeyManagementException {
+    public ResponseEntity<Object> BillValidation(@RequestBody ValidationJson request) {
         try {
             String billerCode = request.getBillerCode();
             Biller biller = billerService.getBillerByBillerCodefromDB(billerCode);
             String sessionID = sessionIdGenerator.getNewSessionId();
 
             URL url = new URL(biller.validationUrl());
-            Map <String,Object> requestBody = new HashMap<>();
+            Map<String, Object> requestBody = new HashMap<>();
 
             Map<String, String> parameterMapping = biller.parameterMapping();
             String userRequestString = gson.toJson(request);
@@ -69,31 +71,46 @@ public record ValidationController(Gson gson) {
                     biller.tlsVersion()
             );
 
+            Map<String, String> responseMapping = biller.verificationResponseMapping();
+            Map<String, String> responseBody = new HashMap<>();
+
             ObjectMapper objectMapper = new ObjectMapper();
-            Response responseObject = objectMapper.readValue(response.get(0),Response.class);
+            Map<String, Object> billerResponseMap = objectMapper.readValue(response.get(0), Map.class);
+            //Map<String, String> billerResponseMap = gson.fromJson(response.get(0), new TypeToken<Map<String, String>>() {}.getType());
+
+            responseMapping.forEach((key, value) -> {
+                if (!value.isEmpty()) {
+                    responseBody.put(key, billerResponseMap.get(value).toString());
+                }
+            });
+            responseBody.put("validationId",sessionID);
+            responseBody.put("status",billerResponseMap.get("status").toString());
+            responseBody.put("message",billerResponseMap.get("message").toString());
+
+            VerificationResponse verificationResponse = objectMapper.convertValue(responseBody,VerificationResponse.class);
 
 
             BillerValidation billerValidation;
             int status = Integer.parseInt(response.get(1));
-            String hash = hashCreator.createSHAHash(sessionID+request.getParam1());
+            String hash = hashCreator.createSHAHash(sessionID + request.getParam1());
 
-            if( responseObject.getStatus().equalsIgnoreCase("S") ){
+            if (responseBody.get("status").equalsIgnoreCase("S")) {
 
-                billerValidation = new BillerValidation(billerCode, sessionID, "success", "pending", hash);
-            }
-            else{
-                billerValidation = new BillerValidation(billerCode, sessionID, "fail", null, hash);
+                billerValidation = new BillerValidation(billerCode, sessionID, "success", "pending", hash, response.get(0), null);
+            } else {
+                billerValidation = new BillerValidation(billerCode, sessionID, "fail", null, hash,response.get(0),null);
             }
 
             billerValidationStorageService.saveBillerValidation(billerValidation);
-            return ResponseEntity.ok().body(billerValidation);
+            return ResponseEntity.ok().body(verificationResponse);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new CustomTimeoutException("SQL");
         } catch (SocketTimeoutException e) {
-            return ResponseEntity.status(500).body("Error: Timed Out with External Server");
-
-        }
-        catch (JsonSyntaxException e) {
+            throw new CustomTimeoutException("The connection to the Biller API timed out");
+            //return ResponseEntity.status(500).body("Error: Timed Out with External Server");
+        } catch (NullPointerException e) {
+            throw new CustomDataNotFoundException("Data Not Found");
+        } catch (JsonSyntaxException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -5,15 +5,6 @@ public class ConfirmationJson {
     public String billerCode;
 
     public String ValidationId;
-
-    public String getValidationId() {
-        return ValidationId;
-    }
-
-    public void setValidationId(String validationId) {
-        ValidationId = validationId;
-    }
-
     public String param1;
     public String param2;
     public String param3;
@@ -22,6 +13,14 @@ public class ConfirmationJson {
     public String param6;
     public String param7;
     public String param8;
+
+    public String getValidationId() {
+        return ValidationId;
+    }
+
+    public void setValidationId(String validationId) {
+        ValidationId = validationId;
+    }
 
     public String getBillerCode() {
         return billerCode;

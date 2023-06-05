@@ -1,4 +1,3 @@
-
 package com.billercode.api.billercodeapi.utils;
 
 import java.math.BigInteger;
@@ -9,7 +8,7 @@ import java.security.NoSuchAlgorithmException;
 public class HashCreator {
 
     public String createSHAHash(String input)
-          throws NoSuchAlgorithmException {
+            throws NoSuchAlgorithmException {
 
         String hashtext = null;
         MessageDigest md = MessageDigest.getInstance("SHA-512");

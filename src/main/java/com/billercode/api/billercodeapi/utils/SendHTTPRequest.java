@@ -21,31 +21,32 @@ import java.util.Map;
 
 public class SendHTTPRequest {
     static final Gson gson = new Gson();
+
     public static ArrayList<String> sendHttpRequest(String requestMethod,
-                                            Map<String, Object> requestPayload,
-                                            URL endpointUrl,
-                                            int connectionTimeout,
-                                            int readTimeout,
-                                            String contentType,
-                                            boolean enableSSL,
-                                            String tlsVersion) throws IOException, NoSuchAlgorithmException, KeyManagementException {
+                                                    Map<String, Object> requestPayload,
+                                                    URL endpointUrl,
+                                                    int connectionTimeout,
+                                                    int readTimeout,
+                                                    String contentType,
+                                                    boolean enableSSL,
+                                                    String tlsVersion) throws IOException, NoSuchAlgorithmException, KeyManagementException {
         BufferedReader streamReader;
-        StringBuilder fullResponseBuilder =  new StringBuilder();
+        StringBuilder fullResponseBuilder = new StringBuilder();
 
-        HashSet<String> requestMethods = new HashSet<>(Arrays.asList( "GET", "POST", "PUT", "DELETE"));
+        HashSet<String> requestMethods = new HashSet<>(Arrays.asList("GET", "POST", "PUT", "DELETE"));
 
-        HttpURLConnection connection ;
+        HttpURLConnection connection;
 
-        if (enableSSL){
+        if (enableSSL) {
             connection = (HttpsURLConnection) endpointUrl.openConnection();
-        }else{
+        } else {
             connection = (HttpURLConnection) endpointUrl.openConnection();
         }
 
 
-        if (requestMethods.contains(requestMethod) ) {
+        if (requestMethods.contains(requestMethod)) {
             connection.setRequestMethod(requestMethod.toUpperCase());
-            if(enableSSL){
+            if (enableSSL) {
                 SSLContext sslContext = SSLContext.getInstance(tlsVersion);
                 sslContext.init(null, null, new SecureRandom());
                 ((HttpsURLConnection) connection).setSSLSocketFactory(sslContext.getSocketFactory());
@@ -54,14 +55,13 @@ public class SendHTTPRequest {
             connection.setConnectTimeout(connectionTimeout);
             connection.setReadTimeout(readTimeout);
 
-            if (!requestMethod.equalsIgnoreCase("GET")){
+            if (!requestMethod.equalsIgnoreCase("GET")) {
                 connection.setDoOutput(true);
                 String jsonString = gson.toJson(requestPayload);
                 OutputStream outStream = connection.getOutputStream();
                 byte[] jsonBody = jsonString.getBytes(StandardCharsets.UTF_8);
-                outStream.write(jsonBody,0,jsonBody.length);
-            }
-            else{
+                outStream.write(jsonBody, 0, jsonBody.length);
+            } else {
                 connection.setDoOutput(false);
             }
 
@@ -74,12 +74,11 @@ public class SendHTTPRequest {
             }
 
             ArrayList<String> response = new ArrayList<>();
-            response.add(0,fullResponseBuilder.append(streamReader.readLine()).toString());
+            response.add(0, fullResponseBuilder.append(streamReader.readLine()).toString());
             response.add(1, String.valueOf(status));
 
-            return response ;
-        }
-        else{
+            return response;
+        } else {
             throw new RuntimeException("Error! Request method is incorrect");
         }
 

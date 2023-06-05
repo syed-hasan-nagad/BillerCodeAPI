@@ -1,9 +1,7 @@
 package com.billercode.api.billercodeapi.controllers;
 
-import com.billercode.api.billercodeapi.models.Biller;
-import com.billercode.api.billercodeapi.models.BillerValidation;
-import com.billercode.api.billercodeapi.models.ConfirmationJson;
-import com.billercode.api.billercodeapi.models.Response;
+import com.billercode.api.billercodeapi.exceptions.CustomTimeoutException;
+import com.billercode.api.billercodeapi.models.*;
 import com.billercode.api.billercodeapi.services.BillerService;
 import com.billercode.api.billercodeapi.services.BillerValidationStorageService;
 import com.billercode.api.billercodeapi.utils.SendHTTPRequest;
@@ -30,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.billercode.api.billercodeapi.controllers.ValidationController.hashCreator;
+import static com.billercode.api.billercodeapi.controllers.VerificationController.hashCreator;
 
 
 @RestController
@@ -44,21 +42,24 @@ public class ConfirmationController {
     private Gson gson;
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> routeRequest(@RequestBody ConfirmationJson request) {
+    public ResponseEntity<Object> routeRequest(@RequestBody ConfirmationJson request) {
 
         try {
             Optional<BillerValidation> validationBiller = billerValidationStorageService.getBillerValidationBySessionID(request.getValidationId());
-            String hash = hashCreator.createSHAHash(request.getValidationId()+request.getParam1());
+            String hash = hashCreator.createSHAHash(request.getValidationId() + request.getParam1());
             if (validationBiller.isEmpty()) {
+//                throw new CustomDataNotFoundException("Transaction validation is not found.");
                 return ResponseEntity.status(400).body("Error: Transaction validation is not found.");
             }
             if (validationBiller.get().validationStatus().equalsIgnoreCase("fail")) {
+//                throw new CustomDataNotFoundException("Transaction failed Validation.");
                 return ResponseEntity.status(400).body("Error: Transaction failed Validation.");
             }
             if (validationBiller.get().confirmationStatus().equalsIgnoreCase("completed")) {
+//                throw new CustomDataNotFoundException("Transaction is already completed.");
                 return ResponseEntity.status(400).body("Error: Transaction is already completed.");
             }
-            if (       (validationBiller.get().validationStatus().equalsIgnoreCase("success"))
+            if ((validationBiller.get().validationStatus().equalsIgnoreCase("success"))
                     && (validationBiller.get().hash().equalsIgnoreCase(hash))
                     && (validationBiller.get().confirmationStatus().equalsIgnoreCase("pending"))) {
 
@@ -87,24 +88,41 @@ public class ConfirmationController {
                         biller.enableSSL(),
                         biller.tlsVersion()
                 );
-                ObjectMapper objectMapper = new ObjectMapper();
-                Response responseObject = objectMapper.readValue(response.get(0), Response.class);
+                //ObjectMapper objectMapper = new ObjectMapper();
+                //Response responseObject = objectMapper.readValue(response.get(0), Response.class);
+                Map<String, String> responseMapping = biller.confirmationResponseMapping();
+                Map<String, String> responseBody = new HashMap<>();
 
-                if (responseObject.getStatus().equalsIgnoreCase("S")) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                Map<String, Object> billerResponseMap = objectMapper.readValue(response.get(0), Map.class);
+
+                responseMapping.forEach((key, value) -> {
+                    if (!value.isEmpty()) {
+                        responseBody.put(key, billerResponseMap.get(value).toString());
+                    }
+                });
+                responseBody.put("status",billerResponseMap.get("status").toString());
+                responseBody.put("message",billerResponseMap.get("message").toString());
+
+                ConfirmationResponse confirmationResponse = objectMapper.convertValue(responseBody, ConfirmationResponse.class);
+
+
+                if (responseBody.get("status").equalsIgnoreCase("S")) {
                     billerValidationStorageService.setConfirmationStatusToComplete(validationBiller.get());
-                }else{
+                    billerValidationStorageService.setConfirmationResponse(validationBiller.get(),response.get(0));
+                } else {
                     billerValidationStorageService.setConfirmationStatusToFailed(validationBiller.get());
+                    billerValidationStorageService.setConfirmationResponse(validationBiller.get(),response.get(0));
                 }
-                return ResponseEntity.ok().body(response.get(0));
+                return ResponseEntity.ok().body(confirmationResponse);
             } else {
                 return ResponseEntity.status(400).body("Error: Bad request");
             }
 
-        }
-        catch(SocketTimeoutException e) {
-            return ResponseEntity.status(500).body("Error: Timed Out with External Server");
-        }
-        catch (SQLException e) {
+        } catch (SocketTimeoutException e) {
+            throw new CustomTimeoutException("Timed out with External Server");
+//            return ResponseEntity.status(500).body("Error: Timed Out with External Server");
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
