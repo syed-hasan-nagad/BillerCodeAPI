@@ -43,7 +43,7 @@ public record VerificationController(Gson gson) {
     public ResponseEntity<Object> BillValidation(@RequestBody ValidationJson request) {
         try {
             String billerCode = request.getBillerCode();
-            Biller biller = billerService.getBillerByBillerCodefromDB(billerCode);
+            Biller biller = billerService.getBillerByBillerCodeFromDB(billerCode);
             String sessionID = sessionIdGenerator.getNewSessionId();
 
             URL url = new URL(biller.validationUrl());
@@ -79,7 +79,7 @@ public record VerificationController(Gson gson) {
             //Map<String, String> billerResponseMap = gson.fromJson(response.get(0), new TypeToken<Map<String, String>>() {}.getType());
 
             responseMapping.forEach((key, value) -> {
-                if (!value.isEmpty()) {
+                if ((!value.isEmpty()&& (billerResponseMap.get(value)!=null))) {
                     responseBody.put(key, billerResponseMap.get(value).toString());
                 }
             });

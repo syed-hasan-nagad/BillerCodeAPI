@@ -63,7 +63,7 @@ public class ConfirmationController {
                     && (validationBiller.get().hash().equalsIgnoreCase(hash))
                     && (validationBiller.get().confirmationStatus().equalsIgnoreCase("pending"))) {
 
-                Biller biller = billerService.getBillerByBillerCodefromDB(request.getBillerCode());
+                Biller biller = billerService.getBillerByBillerCodeFromDB(request.getBillerCode());
                 URL url = new URL(biller.endpointUrl());
                 Map<String, String> parameterMapping = biller.parameterMapping();
                 String userRequestString = gson.toJson(request);
@@ -97,7 +97,7 @@ public class ConfirmationController {
                 Map<String, Object> billerResponseMap = objectMapper.readValue(response.get(0), Map.class);
 
                 responseMapping.forEach((key, value) -> {
-                    if (!value.isEmpty()) {
+                    if ((!value.isEmpty()&&billerResponseMap.get(value)!=null)) {
                         responseBody.put(key, billerResponseMap.get(value).toString());
                     }
                 });
