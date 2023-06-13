@@ -1,6 +1,7 @@
 package com.billercode.api.billercodeapi.services;
 
 import com.billercode.api.billercodeapi.models.Biller;
+import com.billercode.api.billercodeapi.models.ResponseStatusMapping;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -24,7 +25,8 @@ public class BillerService {
 
 
         PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setString(1, billerCode);
+        statement.setString(1,
+                            billerCode);
 
         ResultSet resultSet = statement.executeQuery();
         while (resultSet.next()) {
@@ -41,6 +43,8 @@ public class BillerService {
             String validationUrl = resultSet.getString("validation_url");
             String verificationResponseMappingString = resultSet.getString("verification_response_mapping");
             String confirmationResponseMappingString = resultSet.getString("confirmation_response_mapping");
+            String verificationResponseStatusMappingString = resultSet.getString("verification_response_status_mapping");
+            String confirmationResponseStatusMappingString = resultSet.getString("confirmation_response_status_mapping");
 
             if (enableSSL.equals("Y")) {
                 enableSslFlag = true;
@@ -52,21 +56,42 @@ public class BillerService {
             Map<String, String> parameterMappingMap;
             Type parameterMappingType = new TypeToken<Map<String, String>>() {
             }.getType();
-            parameterMappingMap = gson.fromJson(parameterMappingString, parameterMappingType);
+            parameterMappingMap = gson.fromJson(parameterMappingString,
+                                                parameterMappingType);
 
             Map<String, String> verificationResponseMappingMap;
             Type responseMappingType = new TypeToken<Map<String, String>>() {
             }.getType();
-            verificationResponseMappingMap = gson.fromJson(verificationResponseMappingString, responseMappingType);
+            verificationResponseMappingMap = gson.fromJson(verificationResponseMappingString,
+                                                           responseMappingType);
 
             Map<String, String> confirmationResponseMappingMap;
             Type confirmationResponseMappingType = new TypeToken<Map<String, String>>() {
             }.getType();
-            confirmationResponseMappingMap = gson.fromJson(confirmationResponseMappingString, confirmationResponseMappingType);
+            confirmationResponseMappingMap = gson.fromJson(confirmationResponseMappingString,
+                                                           confirmationResponseMappingType);
 
-            biller = new Biller(billerCode, billerName, endpointUrl,
-                    requestMethod, parameterMappingMap, connectionTimeout,
-                    readTimeout, contentType, tlsVersion, enableSslFlag, validationUrl,verificationResponseMappingMap, confirmationResponseMappingMap);
+            ResponseStatusMapping verificationResponseStatusMapping = gson.fromJson(verificationResponseStatusMappingString,
+                                                                                    ResponseStatusMapping.class);
+            ResponseStatusMapping confirmationResponseStatusMapping = gson.fromJson(confirmationResponseStatusMappingString,
+                                                                                    ResponseStatusMapping.class);
+
+
+            biller = new Biller(billerCode,
+                                billerName,
+                                endpointUrl,
+                                requestMethod,
+                                parameterMappingMap,
+                                connectionTimeout,
+                                readTimeout,
+                                contentType,
+                                tlsVersion,
+                                enableSslFlag,
+                                validationUrl,
+                                verificationResponseMappingMap,
+                                confirmationResponseMappingMap,
+                                verificationResponseStatusMapping,
+                                confirmationResponseStatusMapping);
 
         }
         return biller;

@@ -118,7 +118,8 @@ class CustomControllerAdvice {
                 new ErrorResponse(
                         status,
                         e.getMessage(),
-                        stackTrace // specifying the stack trace in case of 500
+                        stackTrace
+                        // specifying the stack trace in case of 500
                 ),
                 status
         );

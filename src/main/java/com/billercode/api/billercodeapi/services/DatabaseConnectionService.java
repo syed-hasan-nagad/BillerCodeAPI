@@ -14,7 +14,9 @@ public class DatabaseConnectionService {
 
         Connection conn;
         try {
-            conn = DriverManager.getConnection(dbURL, username, password);
+            conn = DriverManager.getConnection(dbURL,
+                                               username,
+                                               password);
         } catch (
                 SQLException e) {
             throw new RuntimeException(e);

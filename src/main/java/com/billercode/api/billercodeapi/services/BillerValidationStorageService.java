@@ -17,13 +17,20 @@ public class BillerValidationStorageService {
         String sql = "INSERT INTO SANZID.BILLERVALIDATIONS VALUES (?,?,?,?,?,?,?)";
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, row.sessionId());
-            statement.setString(2, row.billerCode());
-            statement.setString(3, row.validationStatus());
-            statement.setString(4, row.hash());
-            statement.setString(5, row.confirmationStatus());
-            statement.setString(6, row.verificationResponse());
-            statement.setString(7,row.confirmationResponse());
+            statement.setString(1,
+                                row.sessionId());
+            statement.setString(2,
+                                row.billerCode());
+            statement.setString(3,
+                                row.validationStatus());
+            statement.setString(4,
+                                row.hash());
+            statement.setString(5,
+                                row.confirmationStatus());
+            statement.setString(6,
+                                row.verificationResponse());
+            statement.setString(7,
+                                row.confirmationResponse());
             int i = statement.executeUpdate(); // returns number of records saved/changed as an integer
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -38,7 +45,8 @@ public class BillerValidationStorageService {
         String sql = "UPDATE SANZID.BILLERVALIDATIONS SET confirmationstatus = 'completed' WHERE SESSIONID = ?";
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, row.sessionId());
+            statement.setString(1,
+                                row.sessionId());
             int i = statement.executeUpdate(); // returns number of records saved/changed as an integer
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -53,8 +61,10 @@ public class BillerValidationStorageService {
         String sql = "UPDATE SANZID.BILLERVALIDATIONS SET confirmation_response = ? WHERE SESSIONID = ?";
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, confirmationResponse);
-            statement.setString(2, row.sessionId());
+            statement.setString(1,
+                                confirmationResponse);
+            statement.setString(2,
+                                row.sessionId());
             int i = statement.executeUpdate(); // returns number of records saved/changed as an integer
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -69,7 +79,8 @@ public class BillerValidationStorageService {
         String sql = "UPDATE SANZID.BILLERVALIDATIONS SET confirmationstatus = 'failed' WHERE SESSIONID = ?";
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, row.sessionId());
+            statement.setString(1,
+                                row.sessionId());
             int i = statement.executeUpdate(); // returns number of records saved/changed as an integer
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -83,7 +94,8 @@ public class BillerValidationStorageService {
         Connection connection = DatabaseConnectionService.getDBConnection();
         String sql = "SELECT * FROM SANZID.BILLERVALIDATIONS WHERE SESSIONID=?";
         PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setString(1, sessionID);
+        statement.setString(1,
+                            sessionID);
         ResultSet resultSet = statement.executeQuery();
         BillerValidation billerValidation = null;
         while (resultSet.next()) {
@@ -94,7 +106,13 @@ public class BillerValidationStorageService {
             String hash = resultSet.getString("hash");
             String verificationResponse = resultSet.getString("verification_response");
             String confirmationResponse = resultSet.getString("confirmation_response");
-            billerValidation = new BillerValidation(billerCode, sessionID, validationStatus, confirmationStatus, hash, verificationResponse, confirmationResponse);
+            billerValidation = new BillerValidation(billerCode,
+                                                    sessionID,
+                                                    validationStatus,
+                                                    confirmationStatus,
+                                                    hash,
+                                                    verificationResponse,
+                                                    confirmationResponse);
         }
         connection.close();
         if (billerValidation == null) {

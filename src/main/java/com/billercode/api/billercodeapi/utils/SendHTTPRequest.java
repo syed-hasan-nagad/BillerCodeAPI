@@ -33,7 +33,10 @@ public class SendHTTPRequest {
         BufferedReader streamReader;
         StringBuilder fullResponseBuilder = new StringBuilder();
 
-        HashSet<String> requestMethods = new HashSet<>(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+        HashSet<String> requestMethods = new HashSet<>(Arrays.asList("GET",
+                                                                     "POST",
+                                                                     "PUT",
+                                                                     "DELETE"));
 
         HttpURLConnection connection;
 
@@ -48,10 +51,13 @@ public class SendHTTPRequest {
             connection.setRequestMethod(requestMethod.toUpperCase());
             if (enableSSL) {
                 SSLContext sslContext = SSLContext.getInstance(tlsVersion);
-                sslContext.init(null, null, new SecureRandom());
+                sslContext.init(null,
+                                null,
+                                new SecureRandom());
                 ((HttpsURLConnection) connection).setSSLSocketFactory(sslContext.getSocketFactory());
             }
-            connection.setRequestProperty("Content-Type", contentType);
+            connection.setRequestProperty("Content-Type",
+                                          contentType);
             connection.setConnectTimeout(connectionTimeout);
             connection.setReadTimeout(readTimeout);
 
@@ -60,7 +66,9 @@ public class SendHTTPRequest {
                 String jsonString = gson.toJson(requestPayload);
                 OutputStream outStream = connection.getOutputStream();
                 byte[] jsonBody = jsonString.getBytes(StandardCharsets.UTF_8);
-                outStream.write(jsonBody, 0, jsonBody.length);
+                outStream.write(jsonBody,
+                                0,
+                                jsonBody.length);
             } else {
                 connection.setDoOutput(false);
             }
@@ -74,8 +82,10 @@ public class SendHTTPRequest {
             }
 
             ArrayList<String> response = new ArrayList<>();
-            response.add(0, fullResponseBuilder.append(streamReader.readLine()).toString());
-            response.add(1, String.valueOf(status));
+            response.add(0,
+                         fullResponseBuilder.append(streamReader.readLine()).toString());
+            response.add(1,
+                         String.valueOf(status));
 
             return response;
         } else {

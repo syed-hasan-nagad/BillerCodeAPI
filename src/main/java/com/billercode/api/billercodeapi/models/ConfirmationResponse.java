@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
 //@AllArgsConstructor
-public class ConfirmationResponse extends Response{
+public class ConfirmationResponse extends Response {
 
 }

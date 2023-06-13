@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class VerificationResponse extends Response{
+public class VerificationResponse extends Response {
     String validationId;
 }
