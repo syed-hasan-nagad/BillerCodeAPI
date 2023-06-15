@@ -98,11 +98,11 @@ public record VerificationController(Gson gson) {
             BillerValidation billerValidation;
             String hash = hashCreator.createSHAHash(sessionID + request.getParam1());
             if (biller.verificationResponseStatusMapping().contentType().equalsIgnoreCase("application/json")) {
-                responseBody.put("status",
-                                 billerResponseMap.get("status").toString());
-                responseBody.put("message",
-                                 billerResponseMap.get("message").toString());
+
                 if (biller.verificationResponseStatusMapping().success().contains(billerResponseMap.get(biller.verificationResponseStatusMapping().method()))) {
+
+                    responseBody.put("status","success");
+                    responseBody.put("message","Verification successful.");
 
                     billerValidation = new BillerValidation(billerCode,
                                                             sessionID,
@@ -111,7 +111,10 @@ public record VerificationController(Gson gson) {
                                                             hash,
                                                             response.get(0),
                                                             null);
-                } else if (biller.verificationResponseStatusMapping().fail().contains(responseBody.get(biller.verificationResponseStatusMapping().method()))) {
+                } else if (biller.verificationResponseStatusMapping().fail().contains(billerResponseMap.get(biller.verificationResponseStatusMapping().method()))) {
+                    responseBody.put("status","failed");
+                    responseBody.put("message","Verification failed.");
+
                     billerValidation = new BillerValidation(billerCode,
                                                             sessionID,
                                                             "fail",
@@ -126,6 +129,8 @@ public record VerificationController(Gson gson) {
                 }
             } else if (biller.verificationResponseStatusMapping().contentType().equalsIgnoreCase("HTTP/StatusCodes")) {
                 if (biller.verificationResponseStatusMapping().success().contains(response.get(1))) {
+                    responseBody.put("status","success");
+                    responseBody.put("message","Verification successful.");
 
                     billerValidation = new BillerValidation(billerCode,
                                                             sessionID,
@@ -135,6 +140,9 @@ public record VerificationController(Gson gson) {
                                                             response.get(0),
                                                             null);
                 } else if (biller.verificationResponseStatusMapping().fail().contains(response.get(1))) {
+                    responseBody.put("status","failed");
+                    responseBody.put("message","Verification failed.");
+
                     billerValidation = new BillerValidation(billerCode,
                                                             sessionID,
                                                             "fail",

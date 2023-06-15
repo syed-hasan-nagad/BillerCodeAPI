@@ -108,31 +108,22 @@ public class ConfirmationController {
                 });
 
 
-
                 if (biller.confirmationResponseStatusMapping().contentType().equalsIgnoreCase("application/json")) {
                     responseBody.put("status",
                                      billerResponseMap.get("status").toString());
                     responseBody.put("message",
                                      billerResponseMap.get("message").toString());
-                    if(biller.confirmationResponseStatusMapping().success().contains(billerResponseMap.get(biller.confirmationResponseStatusMapping().method()))){
-                    billerValidationStorageService.setConfirmationStatusToComplete(validationBiller.get());
-                    billerValidationStorageService.setConfirmationResponse(validationBiller.get(),
-                                                                           response.get(0));
-                    } else if (biller.confirmationResponseStatusMapping().fail().contains(billerResponseMap.get(biller.confirmationResponseStatusMapping().method()))) {
-                    billerValidationStorageService.setConfirmationStatusToFailed(validationBiller.get());
-                    billerValidationStorageService.setConfirmationResponse(validationBiller.get(),
-                                                                           response.get(0));
-                    } else {
-                        throw new CustomUnmappedResponseException(HttpStatus.INTERNAL_SERVER_ERROR,
-                                                                  "Response received from Biller not mapped.",
-                                                                  response.get(0));
-                    }
-                } else if (biller.confirmationResponseStatusMapping().contentType().equalsIgnoreCase("HTTP/StatusCodes")){
-                    if(biller.confirmationResponseStatusMapping().success().contains(response.get(1))){
+                    if (biller.confirmationResponseStatusMapping().success().contains(billerResponseMap.get(biller.confirmationResponseStatusMapping().method()))) {
+                        responseBody.put("status","success");
+                        responseBody.put("message","Confirmation successful.");
+
                         billerValidationStorageService.setConfirmationStatusToComplete(validationBiller.get());
                         billerValidationStorageService.setConfirmationResponse(validationBiller.get(),
                                                                                response.get(0));
-                    } else if (biller.confirmationResponseStatusMapping().fail().contains(response.get(1))) {
+                    } else if (biller.confirmationResponseStatusMapping().fail().contains(billerResponseMap.get(biller.confirmationResponseStatusMapping().method()))) {
+                        responseBody.put("status","failed");
+                        responseBody.put("message","Verification failed.");
+
                         billerValidationStorageService.setConfirmationStatusToFailed(validationBiller.get());
                         billerValidationStorageService.setConfirmationResponse(validationBiller.get(),
                                                                                response.get(0));
@@ -141,7 +132,26 @@ public class ConfirmationController {
                                                                   "Response received from Biller not mapped.",
                                                                   response.get(0));
                     }
-                }else{
+                } else if (biller.confirmationResponseStatusMapping().contentType().equalsIgnoreCase("HTTP/StatusCodes")) {
+                    if (biller.confirmationResponseStatusMapping().success().contains(response.get(1))) {
+                        responseBody.put("status","success");
+                        responseBody.put("message","Verification successful.");
+                        billerValidationStorageService.setConfirmationStatusToComplete(validationBiller.get());
+                        billerValidationStorageService.setConfirmationResponse(validationBiller.get(),
+                                                                               response.get(0));
+                    } else if (biller.confirmationResponseStatusMapping().fail().contains(response.get(1))) {
+                        responseBody.put("status","failed");
+                        responseBody.put("message","Verification failed.");
+
+                        billerValidationStorageService.setConfirmationStatusToFailed(validationBiller.get());
+                        billerValidationStorageService.setConfirmationResponse(validationBiller.get(),
+                                                                               response.get(0));
+                    } else {
+                        throw new CustomUnmappedResponseException(HttpStatus.INTERNAL_SERVER_ERROR,
+                                                                  "Response received from Biller not mapped.",
+                                                                  response.get(0));
+                    }
+                } else {
                     throw new CustomUnmappedResponseException(HttpStatus.INTERNAL_SERVER_ERROR,
                                                               "Response method received from Biller not mapped.",
                                                               response.get(0));
@@ -172,3 +182,5 @@ public class ConfirmationController {
     }
 
 }
+
+

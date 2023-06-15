@@ -4,6 +4,7 @@ import com.billercode.api.billercodeapi.models.Biller;
 import com.billercode.api.billercodeapi.models.ResponseStatusMapping;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
 import java.sql.Connection;
@@ -11,7 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
-
+@Service
 public class BillerService {
 
     final Gson gson = new Gson();
